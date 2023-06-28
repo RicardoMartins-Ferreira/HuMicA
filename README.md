@@ -1,4 +1,4 @@
-# HuMicA 
+# HuMicA (Human Microglia Atlas)
 
 ![image](https://github.com/RicardoMartins-Ferreira/HuMicA/assets/77279874/1f89d707-7ad6-4c46-923a-9a8ea1e6cc53)
 
