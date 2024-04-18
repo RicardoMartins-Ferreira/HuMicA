@@ -1,0 +1,52 @@
+---
+title: "Individual dataset processing"
+author: "Ricardo Martins-Ferreira"
+format: html
+editor: visual
+---
+
+## Example for the Grubman et al. 2019 dataset (PMID:31768052)
+
+The following script was applied to the Grubman dataset, which consists of single-nucleus (sn)RNA-seq in entorhinal cortex from deceased six healthy controls and six patients with Alzheimer's Disease (AD).
+
+The data was accessed has a preprocessed count matrix and a covariare matrix, both available at GEO (GSE138852).
+
+### Load required packages
+
+```{r}
+libs <- c("Seurat", "tidyverse", "stringr", "data.table", "readxl")
+suppressMessages(
+suppressWarnings(sapply(libs, require, character.only =TRUE))
+)
+```
+
+### Create Seurat object from count matrix
+
+Upload the count matrix with 13,214 nuclei and 10,850 genes. Create Seurat object includinfg genes present in at least 3 nuceli.
+
+```{r}
+#| warning: false
+Seurat = CreateSeuratObject(counts =count.matrix, min.cells=3)
+```
+
+### Filter low quality nuclei
+
+Remove nuclei with the following features: - Feature count lower than 200 and higher than 5000; - UMI count lower than 500 and higher than 20000; - Percentage of mithocondrial genes higher than 20%: - Percentage of ribosomal genes higher than 5% (only applied to snRNA-seq data).
+
+```{r}
+#| warning: false
+# Calculate the percentage of ribosomal genes
+C<-GetAssayData(object = Seurat, slot = "counts")
+rb.genes <- rownames(Seurat)[grep("^RP[SL]",rownames(Seurat))]
+percent.ribo <- colSums(C[rb.genes,])/Matrix::colSums(C)*100
+Seurat <- AddMetaData(Seurat, percent.ribo, col.name = "percent.ribo")
+
+# Calculate thee percentage of mitochondrial genes
+Seurat[["percent.mt"]] = PercentageFeatureSet(Seurat, pattern = "^MT-")
+
+# Filter low quality nuclei
+SeuratI <- subset(Seurat, subset = nFeature_RNA > 200 & nFeature_RNA < 5000  & nCount_RNA > 500 & 
+                    nCount_RNA < 20000 & percent.mt < 10 & percent.ribo < 5)
+
+Seurat
+```
