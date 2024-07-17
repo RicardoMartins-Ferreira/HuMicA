@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "HuMicA"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: 01. Individual dataset processing.qmd
+      - href: 02. Doublet-Finder.qmd
+      - href: 03. Integration.qmd
+      - href: 04. Clustree.qmd
+      - href: 05. Covariate.qmd
+      - href: 06. Characterization of the HuMicA.qmd
+      - href: 07. Homeostatic clusters.qmd
+      - href: 08. DAM-related clusters.qmd
+      - href: 09. Differential composition.qmd
+      - href: 10. Pseudobulk DEGs.qmd
+      
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+
