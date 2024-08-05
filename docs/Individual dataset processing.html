@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ricardo Martins-Ferreira">
+
+<title>HuMicA - Individual dataset processing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">HuMicA</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./Individual dataset processing.html" aria-current="page"> 
+<span class="menu-text">Individual dataset processing</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Doublet-Finder.html"> 
+<span class="menu-text">Doublet finder</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Integration.html"> 
+<span class="menu-text">Integration</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Clustree.html"> 
+<span class="menu-text">Clustree</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Covariate.html"> 
+<span class="menu-text">Covariate influence</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Characterization of the HuMicA.html"> 
+<span class="menu-text">Characterization of the HuMicA</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Homeostatic clusters.html"> 
+<span class="menu-text">Homeostatic clusters</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./DAM-related clusters.html"> 
+<span class="menu-text">DAM-related clusters</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Differential composition.html"> 
+<span class="menu-text">Differential composition</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Pseudobulk DEGs.html"> 
+<span class="menu-text">Pseudobulk DEGs</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#example-for-the-grubman-et-al.-2019-dataset-pmid31768052" id="toc-example-for-the-grubman-et-al.-2019-dataset-pmid31768052" class="nav-link active" data-scroll-target="#example-for-the-grubman-et-al.-2019-dataset-pmid31768052">Example for the Grubman et al.&nbsp;2019 dataset (PMID:31768052)</a>
+  <ul class="collapse">
+  <li><a href="#load-required-packages" id="toc-load-required-packages" class="nav-link" data-scroll-target="#load-required-packages">Load required packages</a></li>
+  <li><a href="#create-seurat-object-from-count-matrix" id="toc-create-seurat-object-from-count-matrix" class="nav-link" data-scroll-target="#create-seurat-object-from-count-matrix">Create Seurat object from count matrix</a></li>
+  <li><a href="#filter-low-quality-nuclei" id="toc-filter-low-quality-nuclei" class="nav-link" data-scroll-target="#filter-low-quality-nuclei">Filter low quality nuclei</a></li>
+  <li><a href="#quality-control-metrics" id="toc-quality-control-metrics" class="nav-link" data-scroll-target="#quality-control-metrics">Quality Control metrics</a></li>
+  <li><a href="#annotate-nuclei-based-on-sample-information" id="toc-annotate-nuclei-based-on-sample-information" class="nav-link" data-scroll-target="#annotate-nuclei-based-on-sample-information">Annotate nuclei based on sample information</a></li>
+  <li><a href="#filter-out-genes-associated-with-postmortem-interval" id="toc-filter-out-genes-associated-with-postmortem-interval" class="nav-link" data-scroll-target="#filter-out-genes-associated-with-postmortem-interval">Filter out genes associated with postmortem interval</a></li>
+  <li><a href="#doublet-removal" id="toc-doublet-removal" class="nav-link" data-scroll-target="#doublet-removal">Doublet removal</a></li>
+  <li><a href="#renormalization-dimensionality-reduction-and-clustering" id="toc-renormalization-dimensionality-reduction-and-clustering" class="nav-link" data-scroll-target="#renormalization-dimensionality-reduction-and-clustering">(Re)Normalization, dimensionality reduction and clustering</a></li>
+  <li><a href="#calculate-gene-markers-for-each-cluster" id="toc-calculate-gene-markers-for-each-cluster" class="nav-link" data-scroll-target="#calculate-gene-markers-for-each-cluster">Calculate gene markers for each cluster</a></li>
+  <li><a href="#assign-new-cluster-ids-for-cell-types-based-on-marker-expression" id="toc-assign-new-cluster-ids-for-cell-types-based-on-marker-expression" class="nav-link" data-scroll-target="#assign-new-cluster-ids-for-cell-types-based-on-marker-expression">Assign new cluster ids for cell types based on marker expression</a></li>
+  <li><a href="#subset-the-immune-cell-cluster-from-the-seurat-object" id="toc-subset-the-immune-cell-cluster-from-the-seurat-object" class="nav-link" data-scroll-target="#subset-the-immune-cell-cluster-from-the-seurat-object">Subset the immune cell cluster from the Seurat object</a></li>
+  </ul></li>
+  <li><a href="#check-for-outlier-samples" id="toc-check-for-outlier-samples" class="nav-link" data-scroll-target="#check-for-outlier-samples">Check for outlier samples</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Individual dataset processing</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ricardo Martins-Ferreira </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="example-for-the-grubman-et-al.-2019-dataset-pmid31768052" class="level2">
+<h2 class="anchored" data-anchor-id="example-for-the-grubman-et-al.-2019-dataset-pmid31768052">Example for the Grubman et al.&nbsp;2019 dataset (PMID:31768052)</h2>
+<p>The following script was applied to the Grubman dataset, which consists of single-nucleus (sn)RNA-seq in postmortem entorhinal cortex from six healthy controls and six patients with Alzheimer’s Disease (AD).</p>
+<p>The data was accessed as a preprocessed count matrix and a covariare matrix, both available at GEO (GSE138852).</p>
+<section id="load-required-packages" class="level3">
+<h3 class="anchored" data-anchor-id="load-required-packages">Load required packages</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>libs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Seurat"</span>, <span class="st">"tidyverse"</span>, <span class="st">"stringr"</span>, <span class="st">"data.table"</span>, <span class="st">"readxl"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressWarnings</span>(<span class="fu">sapply</span>(libs, require, <span class="at">character.only =</span><span class="cn">TRUE</span>))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Seurat  tidyverse    stringr data.table     readxl 
+      TRUE       TRUE       TRUE       TRUE       TRUE </code></pre>
+</div>
+</div>
+</section>
+<section id="create-seurat-object-from-count-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="create-seurat-object-from-count-matrix">Create Seurat object from count matrix</h3>
+<p>Upload the count matrix with 13,214 nuclei and 10,850 genes. Create Seurat object to include only genes present in at least 3 nuclei.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">=</span> <span class="fu">CreateSeuratObject</span>(<span class="at">counts =</span>count.matrix, <span class="at">min.cells=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="filter-low-quality-nuclei" class="level3">
+<h3 class="anchored" data-anchor-id="filter-low-quality-nuclei">Filter low quality nuclei</h3>
+<p>Remove nuclei with the following features: - Feature counts lower than 200 and higher than 5000; - UMI counts lower than 500 and higher than 20000; - Percentage of mitochondrial genes higher than 20%: - Percentage of ribosomal genes higher than 5% (only applied to snRNA-seq data).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the percentage of ribosomal genes</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>C<span class="ot">&lt;-</span><span class="fu">GetAssayData</span>(<span class="at">object =</span> Seurat, <span class="at">slot =</span> <span class="st">"counts"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rb.genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(Seurat)[<span class="fu">grep</span>(<span class="st">"^RP[SL]"</span>,<span class="fu">rownames</span>(Seurat))]</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>percent.ribo <span class="ot">&lt;-</span> <span class="fu">colSums</span>(C[rb.genes,])<span class="sc">/</span>Matrix<span class="sc">::</span><span class="fu">colSums</span>(C)<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">AddMetaData</span>(Seurat, percent.ribo, <span class="at">col.name =</span> <span class="st">"percent.ribo"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate thee percentage of mitochondrial genes</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>Seurat[[<span class="st">"percent.mt"</span>]] <span class="ot">=</span> <span class="fu">PercentageFeatureSet</span>(Seurat, <span class="at">pattern =</span> <span class="st">"^MT-"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter low quality nuclei</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">subset</span>(Seurat, <span class="at">subset =</span> nFeature_RNA <span class="sc">&gt;</span> <span class="dv">200</span> <span class="sc">&amp;</span> nFeature_RNA <span class="sc">&lt;</span> <span class="dv">5000</span>  <span class="sc">&amp;</span> nCount_RNA <span class="sc">&gt;</span> <span class="dv">500</span> <span class="sc">&amp;</span> </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                    nCount_RNA <span class="sc">&lt;</span> <span class="dv">20000</span> <span class="sc">&amp;</span> percent.mt <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">&amp;</span> percent.ribo <span class="sc">&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>Seurat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>An object of class Seurat 
+10850 features across 11440 samples within 1 assay 
+Active assay: RNA (10850 features, 0 variable features)
+ 1 layer present: counts</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check mean genes per nuclei</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 756.6617</code></pre>
+</div>
+</div>
+<p>The used filtering pipeline originated a Seurat object with 11,440 nuclei, 10,850 genes and approximately 757 genes per nuclei.</p>
+</section>
+<section id="quality-control-metrics" class="level3">
+<h3 class="anchored" data-anchor-id="quality-control-metrics">Quality Control metrics</h3>
+<p>Visualize the number of genes and UMI counts per nuclei, and the percentage of mitochondrial and ribosomal genes as violin plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">VlnPlot</span>(Seurat, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"nFeature_RNA"</span>, <span class="st">"nCount_RNA"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">"percent.mt"</span>,<span class="st">"percent.ribo"</span>), <span class="at">ncol =</span> <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Default search for "data" layer in "RNA" assay yielded no results;
+utilizing "counts" layer instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>FeatureScatter representation of the association between the number of UMI counts per nuclei and the percentage of mitochondrial genes, and between UMI counts and the number of genes per nuclei.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot1 <span class="ot">=</span> <span class="fu">FeatureScatter</span>(Seurat, <span class="at">feature1 =</span> <span class="st">"nCount_RNA"</span>, <span class="at">feature2 =</span> <span class="st">"percent.mt"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>plot2 <span class="ot">=</span> <span class="fu">FeatureScatter</span>(Seurat, <span class="at">feature1 =</span> <span class="st">"nCount_RNA"</span>, <span class="at">feature2 =</span> <span class="st">"nFeature_RNA"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(plot1 <span class="sc">+</span> plot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="annotate-nuclei-based-on-sample-information" class="level3">
+<h3 class="anchored" data-anchor-id="annotate-nuclei-based-on-sample-information">Annotate nuclei based on sample information</h3>
+<p>This dataset contains 3 controls and 3 patient samples, with each one being composed of two pooled individual samples.</p>
+<p>Create a column in metadata (TAG) with the nuclei annotation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>TAG <span class="ot">&lt;-</span> <span class="fu">rownames</span>(Seurat<span class="sc">@</span>meta.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The name of each sample (Sample_ID) is merged to each nuclei’s annotation. Split the sample name from the full nuclei name.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>x<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">str_split_fixed</span>(Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>TAG,<span class="st">"_"</span>,<span class="dv">2</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>Sample_ID <span class="ot">&lt;-</span> x<span class="sc">$</span>V2</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>Sample_ID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AD5_AD6" "AD5_AD6" "AD5_AD6" "AD5_AD6" "AD5_AD6" "AD5_AD6"</code></pre>
+</div>
+</div>
+<p>Remove the columns on percent.ribo and percent.mt from the metadata.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>Seurat<span class="sc">@</span>meta.data <span class="ot">&lt;-</span> Seurat<span class="sc">@</span>meta.data[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">5</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="filter-out-genes-associated-with-postmortem-interval" class="level3">
+<h3 class="anchored" data-anchor-id="filter-out-genes-associated-with-postmortem-interval">Filter out genes associated with postmortem interval</h3>
+<p>Remove the list of genes associated with postmortem interval in bulk RNA-seq in cerebral cortex (Zhu et. al 2017; PMID: 28710439). This list (“PMI-genes.csv”) is available on the “Support data” folder from this repository.</p>
+<p>Note: In the original Grubman et al.&nbsp;study these genes had already been removed. This script was applied to all other datasets.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>keep<span class="ot">=</span> <span class="fu">c</span>(<span class="sc">!</span><span class="fu">rownames</span>(Seurat) <span class="sc">%in%</span> <span class="fu">c</span>(PMI_genes))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>Seurat<span class="ot">&lt;-</span> <span class="fu">subset</span>(<span class="at">x =</span> Seurat,<span class="at">features =</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span>(<span class="fu">dim</span>(Seurat)[<span class="dv">1</span>]))[keep])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>Seurat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>An object of class Seurat 
+10850 features across 11440 samples within 1 assay 
+Active assay: RNA (10850 features, 0 variable features)
+ 1 layer present: counts</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check mean genes per nuclei</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 756.6617</code></pre>
+</div>
+</div>
+</section>
+<section id="doublet-removal" class="level3">
+<h3 class="anchored" data-anchor-id="doublet-removal">Doublet removal</h3>
+<p>Doublets (n=858) had already been calculated using DoubletFinder (see script in “Double-Finder.html” in this repository). Upload a vector of nuclei (“doublets”) deemed as doublets. Plot the Seurat object highlighting the doublets.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">SCTransform</span>(Seurat, <span class="at">verbose =</span> <span class="cn">FALSE</span>) <span class="co">#default variable features = 3000</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(Seurat, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(Seurat, <span class="at">reduction =</span> <span class="st">"pca"</span>,<span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(Seurat, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">cells.highlight =</span> doublets,<span class="at">pt.size =</span> <span class="fl">0.1</span>, <span class="at">sizes.highlight =</span> <span class="fl">0.1</span>)<span class="sc">+</span> <span class="fu">NoLegend</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Remove the doublets from the Seurat object. The new object is composed of 10582 nuclei.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>toRemove <span class="ot">&lt;-</span> doublets</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> Seurat[,<span class="sc">!</span><span class="fu">colnames</span>(Seurat) <span class="sc">%in%</span> toRemove]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>Seurat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>An object of class Seurat 
+21700 features across 10582 samples within 2 assays 
+Active assay: SCT (10850 features, 3000 variable features)
+ 3 layers present: counts, data, scale.data
+ 1 other assay present: RNA
+ 2 dimensional reductions calculated: pca, umap</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(Seurat<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 756.4457</code></pre>
+</div>
+</div>
+</section>
+<section id="renormalization-dimensionality-reduction-and-clustering" class="level3">
+<h3 class="anchored" data-anchor-id="renormalization-dimensionality-reduction-and-clustering">(Re)Normalization, dimensionality reduction and clustering</h3>
+<p>After removal of the doublets, the SCT normalization is repeated and the clustering is done with FindNeighbors and FindClusters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">SCTransform</span>(Seurat, <span class="at">verbose =</span> <span class="cn">FALSE</span>) <span class="co">#default variable features = 3000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in sqrt(1/i): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in sqrt(1/i): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in sqrt(1/i): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in sqrt(1/i): NaNs produced</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached
+Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+control$trace &gt; : iteration limit reached</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Different cells and/or features from existing assay SCT</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(Seurat, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(Seurat, <span class="at">reduction =</span> <span class="st">"pca"</span>,<span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(Seurat, <span class="at">reduction =</span> <span class="st">"pca"</span>,<span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(Seurat,<span class="at">resolution =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+
+Number of nodes: 10582
+Number of edges: 420910
+
+Running Louvain algorithm...
+Maximum modularity in 10 random starts: 0.9890
+Number of communities: 8
+Elapsed time: 1 seconds</code></pre>
+</div>
+</div>
+<p>Eight clusters were originated for a clustering resolution of 0.05.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(Seurat, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Annotated by Sample_ID.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(Seurat, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">label =</span> <span class="cn">FALSE</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>, <span class="at">group.by =</span> <span class="st">"Sample_ID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="calculate-gene-markers-for-each-cluster" class="level3">
+<h3 class="anchored" data-anchor-id="calculate-gene-markers-for-each-cluster">Calculate gene markers for each cluster</h3>
+<p>Use FindAllMarkers to calculate the markers for each cluster.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>Seurat.markers <span class="ot">&lt;-</span> <span class="fu">FindAllMarkers</span>(Seurat, <span class="at">only.pos =</span> <span class="cn">TRUE</span>, <span class="at">min.pct =</span> <span class="fl">0.1</span>, <span class="at">logfc.threshold =</span> <span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Upload the list of canonical cell-type markers collected from the literature that is located at the “Support data” folder of this repository. Check for canonical markers within Seurat.markers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>known_markers <span class="ot">&lt;-</span> <span class="fu">merge</span>(Seurat.markers, Brain_cell_markers, <span class="at">by=</span><span class="st">"gene"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Check the expression of some canonical markers to guide cluster annotation. Script for the stacked violin plot function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="do">## remove the x-axis text and tick</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="do">## plot.margin to adjust the white space between each plot.</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="do">## ... pass any arguments to VlnPlot in Seurat</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>modify_vlnplot<span class="ot">&lt;-</span> <span class="cf">function</span>(obj,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>feature,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="at">pt.size =</span> <span class="dv">0</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="at">plot.margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.75</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.75</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>...) {</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>p<span class="ot">&lt;-</span> <span class="fu">VlnPlot</span>(obj, <span class="at">features =</span> feature, <span class="at">pt.size =</span> pt.size <span class="co">#,cols = UMAP_colors</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>, ... ) <span class="sc">+</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="fu">xlab</span>(<span class="st">""</span>) <span class="sc">+</span> <span class="fu">ylab</span>(feature) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a><span class="at">axis.ticks.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fu">rel</span>(<span class="dv">1</span>), <span class="at">angle =</span> <span class="dv">45</span>),</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="fu">rel</span>(<span class="dv">1</span>)),</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="at">plot.margin =</span> plot.margin )</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(p)</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="do">## extract the max value of the y axis</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>extract_max<span class="ot">&lt;-</span> <span class="cf">function</span>(p){</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>ymax<span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">ggplot_build</span>(p)<span class="sc">$</span>layout<span class="sc">$</span>panel_scales_y[[<span class="dv">1</span>]]<span class="sc">$</span>range<span class="sc">$</span>range)</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(<span class="fu">ceiling</span>(ymax))</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="do">## main function</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>StackedVlnPlot<span class="ot">&lt;-</span> <span class="cf">function</span>(obj, features,</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a><span class="at">pt.size =</span> <span class="dv">0</span>,</span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a><span class="at">plot.margin =</span> <span class="fu">unit</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.75</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.75</span>, <span class="dv">0</span>), <span class="st">"cm"</span>),</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>...) {</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>plot_list<span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(features, <span class="cf">function</span>(x) <span class="fu">modify_vlnplot</span>(<span class="at">obj =</span> obj,<span class="at">feature =</span> x, ...))</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Add back x-axis title to bottom plot. patchwork is going to support this?</span></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>plot_list[[<span class="fu">length</span>(plot_list)]]<span class="ot">&lt;-</span> plot_list[[<span class="fu">length</span>(plot_list)]] <span class="sc">+</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>), <span class="at">axis.ticks.x =</span> <span class="fu">element_line</span>())</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a><span class="co"># change the y-axis tick to only max value</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>ymaxs<span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dbl</span>(plot_list, extract_max)</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>plot_list<span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2</span>(plot_list, ymaxs, <span class="cf">function</span>(x,y) x <span class="sc">+</span></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(y)) <span class="sc">+</span></span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_limits</span>(<span class="at">y =</span> y))</span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>p<span class="ot">&lt;-</span> patchwork<span class="sc">::</span><span class="fu">wrap_plots</span>(<span class="at">plotlist =</span> plot_list, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(p)</span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Stacked violin plots</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>markers<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"PLP1"</span>,<span class="st">"ST18"</span>,  <span class="co">#OLIGO</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="st">"SYT1"</span>, <span class="st">"SNAP25"</span>,           <span class="co">#NEURONS</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="st">"SLC1A2"</span>, <span class="st">"AQP4"</span>,           <span class="co">#ASTROCYTES</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="st">"VCAN"</span>, <span class="st">"PDGFRA"</span>,           <span class="co">#OPCS</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="st">"DOCK8"</span>, <span class="st">"P2RY12"</span>,          <span class="co">#IMMUNE CELLS</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="st">"CLDN5"</span>, <span class="st">"FLT1"</span>)            <span class="co">#ENDOT</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a><span class="fu">StackedVlnPlot</span>(<span class="at">obj =</span> Seurat, <span class="at">features =</span> markers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="assign-new-cluster-ids-for-cell-types-based-on-marker-expression" class="level3">
+<h3 class="anchored" data-anchor-id="assign-new-cluster-ids-for-cell-types-based-on-marker-expression">Assign new cluster ids for cell types based on marker expression</h3>
+<p>Make this assessment based on the previous information.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>new.cluster.ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Oligodendrocytes"</span>, <span class="st">"Astrocytes"</span>,<span class="st">"Oligodendrocytes"</span>,<span class="st">"Oligodendrocytes"</span>,<span class="st">"OPCs"</span>,<span class="st">"Neurons"</span>,<span class="st">"Immune cells"</span>,<span class="st">"Astrocytes"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(new.cluster.ids) <span class="ot">&lt;-</span> <span class="fu">levels</span>(Seurat)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(Seurat, new.cluster.ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Feature plot with the Module score of the expression of microglia/immune cell markers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DefaultAssay</span>(Seurat) <span class="ot">&lt;-</span> <span class="st">"SCT"</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>Immune_genes <span class="ot">&lt;-</span><span class="fu">c</span>( <span class="st">"P2RY12"</span>,<span class="st">"DOCK8"</span>,<span class="st">"CD74"</span>,<span class="st">"CX3CR1"</span>,<span class="st">"C1QB"</span>,<span class="st">"C3"</span>,<span class="st">"AIF1"</span>,<span class="st">"HLA-DRA"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>Seurat <span class="ot">&lt;-</span> <span class="fu">AddModuleScore</span>(Seurat,<span class="at">features =</span><span class="fu">list</span>(Immune_genes),<span class="at">name=</span><span class="st">'Immune_genes'</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(Seurat, <span class="at">features =</span> <span class="st">"Immune_genes1"</span>,<span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"#F1EEE9"</span>,<span class="st">"#DF7861"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Color the UMAP plot by cell-type.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>UMAP_colors<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="st">"#525E75"</span>, <span class="co">#Oligodendrocytes</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="st">"#92BA92"</span>,                <span class="co">#Astrocytes</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="st">"#A7D2CB"</span>,                <span class="co">#OPCs</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="st">"#F2D388"</span>,                <span class="co">#Neurons</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="st">"#DF7861"</span>                 <span class="co">#Immune cells</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(Seurat, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">label =</span> <span class="cn">FALSE</span>, <span class="at">repel =</span> F ,<span class="at">cols =</span> UMAP_colors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Individual-dataset-processing_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="subset-the-immune-cell-cluster-from-the-seurat-object" class="level3">
+<h3 class="anchored" data-anchor-id="subset-the-immune-cell-cluster-from-the-seurat-object">Subset the immune cell cluster from the Seurat object</h3>
+<p>The nuclei annotated as belonging to immune cells are singled-out in an individual Seurat object, consisting of 340 nuclei, to be later integrated with the other datasets to form the<br>
+Human Microglia Atlas (HuMicA).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>Immune_Seurat<span class="ot">&lt;-</span> Seurat[,Seurat<span class="sc">@</span>active.ident<span class="sc">==</span><span class="st">"Immune cells"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="check-for-outlier-samples" class="level2">
+<h2 class="anchored" data-anchor-id="check-for-outlier-samples">Check for outlier samples</h2>
+<p>The last step consist on verifying if any of the samples within the filtered object shows an unbalanced number of nuclei. In this case, all samples have an approximate number of nuclei. Therefore, all were included in the final integration.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>md <span class="ot">&lt;-</span> Immune_Seurat<span class="sc">@</span>meta.data <span class="sc">%&gt;%</span> as.data.table</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>Cell_number_subject <span class="ot">&lt;-</span> md[, .N, by <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Sample_ID"</span>)]</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>Cell_number_subject</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Sample_ID     N
+      &lt;char&gt; &lt;int&gt;
+1:   AD5_AD6    29
+2:   AD3_AD4    84
+3:   Ct5_Ct6    55
+4:   Ct3_Ct4    83
+5:   Ct1_Ct2    39
+6:   AD1_AD2    45</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
