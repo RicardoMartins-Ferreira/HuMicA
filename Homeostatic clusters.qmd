@@ -1,0 +1,316 @@
+---
+title: "Homeostatic clusters"
+author: "Ricardo Martins-Ferreira"
+format: html
+editor: visual
+---
+
+## Homeostatic clusters
+
+This script depicts the specific and in-depth characterization of the homeostatic clusters, including gene markers, gene ontology and transcription factor enrichment, related to Figure 2.
+
+### Load required packages
+
+```{r}
+#| message: false
+libs <- c("Seurat", "tidyverse", "clusterProfiler","viper","dorothea","org.Hs.eg.db","ggrepel","gridExtra","ggpubr","data.table")
+suppressMessages(
+suppressWarnings(sapply(libs, require, character.only =TRUE))
+)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: hide
+# upload the HuMicA
+Humica <- readRDS("~/d/Ricardo/HuMicA/Integration/without_RM102/Humica/Humica.rds")
+DefaultAssay(Humica)<- "integrated"
+Humica <- RunPCA(Humica, verbose = FALSE)
+Humica <- RunUMAP(Humica, reduction = "pca", dims = 1:50)
+Humica <- FindNeighbors(Humica,  reduction = "pca",dims = 1:50)
+Humica <- FindClusters(Humica,resolution =0.2)
+```
+
+### Dendrogram
+
+Dendrogram accounting for the averaged gene expression of the cluster markers (from Figure 1F) per cluster. The "RNA" assay was used. The calculation of the significant cluster markers is depicted at the "Characterization of the HuMicA" script from this repository.
+
+```{r}
+#| echo: false
+sig_markers <- read.table("~/d/Ricardo/HuMicA/Integration/without_RM102/Humica/res0.2/Sig_up_markers_res.0.2.txt")
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| results: hide
+genes <- sig_markers$gene
+mat <- AverageExpression(Humica)$RNA %>% data.frame()
+mat <- mat[genes,] %>% as.matrix() 
+
+seeds_df_sc <- as.data.frame(scale(mat))
+summary(seeds_df_sc)
+
+
+hc <-hclust(as.dist(1-cor(seeds_df_sc, method="spearman")), method="ward.D") 
+sampleTree = as.dendrogram(hc)
+
+plot(sampleTree)
+```
+
+### UMAP of Homeostatic clusters
+
+The representation of the HuMicA object was edited to depict only the four homeostatic populations, namely clusters 0 (Homeos1), 4 (Homeos2) and 8 (Homeos3).
+
+```{r}
+#| fig-width: 5
+#| fig-height: 5
+color_clusters <-c("#fdc835ff", "white", "white" ,"white", "#D43921" ,"white", "white" ,"white", "#5B7B7A")
+DimPlot(Humica, reduction = "umap",cols = color_clusters, repel = TRUE, pt.size = 0.01, label = F)+NoLegend()
+```
+
+### Representation of the main markers
+
+The top 10 signigicant markers for clusters 0, 4 and 8 were represented.
+
+#### Dotplot
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 7
+#| warning: false
+homeos_markers <- sig_markers[sig_markers$cluster %in% c("0","4","8"),]
+homeos_markers$avg_log2FC<- as.numeric(homeos_markers$avg_log2FC)
+
+homeos_markers %>%
+  group_by(cluster) %>% arrange(-avg_log2FC) %>% arrange(cluster) %>% 
+  top_n(n = 10, wt = avg_log2FC)-> top10_up 
+
+DefaultAssay(Humica) <- "RNA"
+Humica<- NormalizeData(Humica)
+
+DotPlot(Humica, features = factor(rev(top10_up$gene %>% unique), levels = rev(top10_up$gene %>% unique)) , dot.scale = 10) +
+  scale_colour_gradient2(low = "darkblue", mid = "white", high = "darkred")+
+  theme(axis.text.x = element_text(angle=90, hjust = 0))+coord_flip()
+```
+
+#### Feature plots
+
+The most prominent markers of each cluster were represented separately in Feature plots: P2RY12 and KBTBD12 for Homeos1; GRID2 for Homeos2; SERPINE1 for Homeos3 (related to Supplementary Figure 6A).
+
+```{r}
+#| fig-width: 16
+#| fig-height: 4
+Humica <- SetIdent(Humica, value = Humica@meta.data$integrated_snn_res.0.2)
+DefaultAssay(Humica)<-"RNA"
+Humica <- NormalizeData(Humica)
+
+FeaturePlot(Humica, features = c("P2RY12","KBTBD12","GRID2","SERPINE1"), ncol=4,label = F, repel = TRUE,pt.size = 0.5) & scale_colour_gradientn(colours = c("#FCFCFF","#FCFCFF","#DCF2CE","#FFCB77","#BD6B73","#A30B37"))
+```
+
+### Gene ontology
+
+Gene ontology (GO) was calculated with the enrichGO function from clusterProfiler.
+
+#### cnetPlot
+
+GO enrichment was calculated for the list of markers of each homeostatic cluster. The simplify function was used to remove redundancy to the obtained results. The cnetplots were set to represent only the top 3 categories.
+
+```{r}
+#| fig-width: 9
+#| fig-height: 4
+#| warning: false
+#| message: false
+#| results: hide
+i=0
+
+p <- list()
+for(comparison in levels(factor(homeos_markers$cluster))){
+  i = i+1
+  print(paste(comparison))
+  
+  ego <- enrichGO(gene              = homeos_markers[homeos_markers$cluster == comparison,]$gene,
+                  OrgDb             = org.Hs.eg.db,
+                  ont               = "ALL",
+                  keyType           = "SYMBOL",
+                  pAdjustMethod     = "BH",
+                  pvalueCutoff      = 1,
+                  qvalueCutoff      = 0.05,
+                  readable          = T )
+  ego <- simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
+  
+  geneList <- homeos_markers[homeos_markers$cluster==comparison,]$avg_log2FC
+  names(geneList)<-homeos_markers[homeos_markers$cluster==comparison,]$gene
+  
+  p[[i]]<- cnetplot(ego, cex_label_category=1,colorEdge = F,shadowtext="none",showCategory = 3,categorySize="pvalue", foldChange =geneList, color_category="#339989") + ggtitle(comparison) &
+    scale_colour_gradient2(high = "#8B0000", low="#371E97", midpoint = 0)
+}
+
+p[1]
+p[2]
+p[3]
+```
+
+#### Barplots
+
+The top 10 significant GO terms for each of the homeostatic clusters were represented in barplots to provide a broader insight on the GO enrichment (related to Supplementary Figure 6B). GO was recalculated and edited to obtain the Fold Change of enrichment.
+
+```{r}
+i = 0
+results <- list()
+go_all_simplify <- data.frame()
+for(comparison in levels(factor(homeos_markers$cluster))){
+  i = i+1
+  print(paste(comparison))
+  ego <- enrichGO(gene              = homeos_markers[homeos_markers$cluster == comparison,]$gene,
+                  OrgDb             = org.Hs.eg.db,
+                  ont               = "ALL",
+                  keyType           = "SYMBOL",
+                  pAdjustMethod     = "BH",
+                  pvalueCutoff      = 1,
+                  qvalueCutoff      = 0.05,
+                  readable          = T )
+  ego <- simplify(ego, cutoff=0.7, by="p.adjust", select_fun=min)
+  
+  results[[comparison]] <- ego@result %>%
+    separate(GeneRatio, into = c("gene_pos", "gene_total"), sep = "/") %>%
+    separate(BgRatio, into = c("bg_pos", "bg_total"), sep = "/") %>%
+    mutate(FC = (as.numeric(gene_pos)/as.numeric(gene_total)) /
+             (as.numeric(bg_pos)/as.numeric(bg_total)),
+           cluster = comparison) %>%
+    arrange(.$p.adjust)
+  go_all_simplify <- rbind(go_all_simplify, results[[comparison]])
+}
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| results: false
+go_all_simplify<- fread("~/d/Ricardo/HuMicA/Integration/without_RM102/Humica/res0.2/GO/go_all_simplify_res0.2.csv")
+```
+
+```{r}
+#| fig-width: 6
+#| fig-height: 8
+
+clusterlist <- c("0","4","8")
+p<-list()
+for (i in 1:length(clusterlist)) {
+  data <-go_all_simplify[go_all_simplify$cluster==clusterlist[i],]
+  data$logpadj <- -log10(data$p.adjust)
+  data$logFC<- log10(data$FC)
+  top10 <- data %>%top_n(n = 10, wt = logpadj)
+  top10 <- top10[1:10,]
+  
+  
+  p[[i]]<- ggplot(top10,
+                  aes(fill=logFC,
+                      x=factor(ID, level = rev(ID)),
+                      y=logpadj,
+                      color="black")) +
+    geom_col(color="black", size=0.2) +
+    geom_text(aes(label = Description), hjust=0,position = position_fill(vjust = 0), size = 4, color="black")+
+    theme_bw() +
+    scale_fill_gradientn(colours = c("#B9CFD4","#AFAAB9","#B48291","#8C5465"))+
+    #scale_fill_viridis(option = "plasma")+
+    coord_flip()
+}
+
+do.call(grid.arrange,p)
+
+```
+
+### Transcription factor enrichment
+
+The collection of transcription factors (TFs) and their target genes was obtained from the DoRothEA regulon A. The enrichment analysis was performed using the viper package. The regulon object downloaded from https://github.com/deeenes/DoRothEA/tree/master/data/TFregulons/Robjects_VIPERformat/consensus, already in the appropriate format to be used in the viper pipeline. The Humica.markers file correspond to the broad spectrum differential expression output, mentioned in the "Characterization of the HuMicA" script of this repository. The following represents the loop for the calculation of TF enrichment in all nine clusters.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+Humica_markers <- read.table("~/d/Ricardo/HuMicA/Integration/without_RM102/Humica/res0.2/Markers_Inf_res.0.2.txt")
+
+load("~/d/Ricardo/HuMicA/Dorothea_regulons/A_viperRegulon.rdata")
+regulon_A<- viper_regulon
+names(regulon_A)=sapply(strsplit(names(regulon_A),split=" - "),head, 1)
+
+```
+
+```{r}
+#| results: hide
+#| message: false
+#| warning: false
+regulon_A<- viper_regulon
+names(regulon_A)=sapply(strsplit(names(regulon_A),split=" - "),head, 1)
+
+list <- unique(Humica_markers$cluster)
+TF_activities_all <- data.frame()
+
+for (i in 1:length(list)) {
+
+data <- Humica_markers[Humica_markers$cluster==list[i],]
+
+#Exclude probes with unknown or duplicated gene symbol
+DEsignature = subset(data, gene != "" )
+
+DEsignature = subset(DEsignature, ! duplicated(gene))
+
+# Estimatez-score values for the GES. Cheeck VIPER manual for details
+
+myStatistics = matrix(DEsignature$avg_log2FC, dimnames = list(DEsignature$gene,
+                                                              
+                                                              'avg_log2FC') )
+
+myPvalue = matrix(DEsignature$p_val_adj, dimnames = list(DEsignature$gene, 'padj') )
+
+mySignature = (qnorm(myPvalue/2, lower.tail = FALSE) * sign(myStatistics))[, 1]
+
+mySignature = mySignature[order(mySignature, decreasing = T)]
+
+# Estimate TF activities
+
+mrs = msviper(ges = mySignature, regulon = regulon_A,minsize = 25, ges.filter = F)
+
+TF_activities = data.frame(Regulon = names(mrs$es$nes),
+                           
+                           Size = mrs$es$size[ names(mrs$es$nes) ],
+                           
+                           NES = mrs$es$nes,
+                           
+                           p.value = mrs$es$p.value,
+                           
+                           FDR = p.adjust(mrs$es$p.value, method = 'fdr'))
+
+TF_activities = TF_activities[ order(TF_activities$p.value), ]
+TF_activities$cluster <- list[i]
+TF_activities_all<- rbind(TF_activities_all, TF_activities)
+}
+```
+
+#### Dotplot
+
+The plot depicts the enrichment for all clusters in the HuMicA but only considers the significant TFs for the three homeostatic clusters is considered for representation. The statistically significant TFs were considered for an adj p value (FDR) \< 0.05.
+
+```{r}
+#| fig-width: 6.5
+#| fig-height: 3.5
+TF_activities_homeos <- TF_activities_all[TF_activities_all$cluster %in% c("0","4","8"),]
+
+TF_activities_homeos_sig <- TF_activities_homeos[TF_activities_homeos$FDR < 0.05,]
+
+#Plot TF enrichment results
+TF_activities_all <- TF_activities_all%>% 
+  mutate(logFDR = -log(FDR))
+
+common_features <- TF_activities_homeos_sig$Regulon %>% unique()
+
+ggplot(TF_activities_all %>% dplyr::filter(Regulon %in% common_features), aes(as.factor(cluster), y= factor(Regulon, levels = common_features),color=NES,size =logFDR)) +
+  geom_point() +
+  scale_color_gradient2(low="#47663D",mid = "white",high="#B86B00")+
+  theme_pubr(border = 1)+ 
+  coord_flip()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+```

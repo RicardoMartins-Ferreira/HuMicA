@@ -1,0 +1,171 @@
+---
+title: "Clustree"
+author: "Ricardo Martins-Ferreira"
+format: html
+editor: visual
+---
+
+## Optimal clustering resolution with clustree
+
+The following script identifies the optimal clustering resolution to be used in the Seurat workflow using the clustree package (https://github.com/lazappi/clustree).
+
+### Load required packages
+
+```{r}
+#| message: false
+libs <- c("Seurat", "tidyverse", "clustree")
+suppressMessages(
+suppressWarnings(sapply(libs, require, character.only =TRUE))
+)
+```
+
+### Integrated immune cell object
+
+The full integrated object composed of 102,390 nuclei/cells was uploaded.
+
+```{r}
+#| echo: false
+Seurat <- readRDS("~/d/Ricardo/HuMicA/Integration/without_RM102/Annot_seurat.rds")
+row.names(Seurat@meta.data)<- Seurat@meta.data$TAG
+```
+
+### Identification of the myeloid population (related to Supplementary Figure 3A-C)
+
+Upon integration of the immune cell clusters from all nineteen datasets, we expected to encounter T cells and potentially doublets that passed previous filtering. The standard Seurat dimensionality reduction and clustering workflow were used.
+
+```{r}
+#| warning: false
+DefaultAssay(Seurat)<- "integrated"
+Seurat <- RunPCA(Seurat, verbose = FALSE)
+Seurat <- RunUMAP(Seurat, reduction = "pca", dims = 1:50)
+Seurat <- FindNeighbors(Seurat,  reduction = "pca",dims = 1:50)
+```
+
+Clustering was performed with increasing resolutions before using the clustree function.
+
+```{r}
+#| message: false
+#| warning: false
+Seurat <- FindClusters(Seurat,resolution =0.01)
+Seurat <- FindClusters(Seurat,resolution =0.025)
+Seurat <- FindClusters(Seurat,resolution =0.05)
+Seurat <- FindClusters(Seurat,resolution =0.075)
+```
+
+Plotting a clustree:
+
+```{r}
+clustree(Seurat@meta.data, prefix = "integrated_snn_res.")
+```
+
+To characterize the clusters obtained, the expression of canonical cell-type markers was evaluated for the low resolutions (0.01 and 0.025). To do so, DefaultAssay is set to "RNA" and normalized.
+
+```{r}
+DefaultAssay(Seurat)<-"RNA"
+Seurat <- NormalizeData(Seurat)
+
+# For resolution = 0.01
+DotPlot(Seurat, group.by= "integrated_snn_res.0.01", 
+                features = c("P2RY12","CX3CR1", # microglia
+                             "MRC1","CD163",    # macrophages
+                             "CD247","TRAC")) + # T cells
+  scale_colour_gradient2(low = "darkblue", mid = "white", high = "darkred")+
+  theme(axis.text.x = element_text(angle=90, hjust = 0))
+
+# For resolution = 0.025
+DotPlot(Seurat, group.by= "integrated_snn_res.0.025", features = c("P2RY12","CX3CR1", # microglia
+                                                                  "MRC1","CD163",     # macrophages 
+                                                                  "CD247","TRAC",     # T cells
+                                                                  "SNAP25","SYT1",    # Neurons
+                                                                  "PLP1","ST18",      # Oligodendrocytes
+                                                                  "SLC1A2",           # Astrocytes
+                                                                  "PDGFRA")) +        # OPCs
+  scale_colour_gradient2(low = "darkblue", mid = "white", high = "darkred")+
+  theme(axis.text.x = element_text(angle=90, hjust = 0))
+```
+
+Plot the UMAP of the three main cell-types. Based on the expression of the aforementioned markers, we have concluded that the three populations obtained for resolution = 0.025 represent the main myeloid population (cluster 0), that included microglia and border-associated macrophages, doublets (cluster 1) and T cells (cluster 2).
+
+```{r}
+DimPlot(Seurat, reduction = "umap",cols = c("#86C4BB","#8A6A86","#E0A458"),
+        group.by = "integrated_snn_res.0.025", raster = FALSE,pt.size = 0.001)
+```
+
+# Optimal clustering resolution of the final HuMicA object
+
+The Human Microglia Atlas (HuMicA) consists of the myeloid population (cluster 0) identified above.
+
+```{r}
+Humica <- subset(x = Seurat, cells = WhichCells(Seurat, expression = integrated_snn_res.0.025=="0"))
+row.names(Humica@meta.data)<- Humica@meta.data$TAG
+Humica
+```
+
+In addition, the nuclei/cells belonging to individual samples with less than 50 nuclei/cells were removed.
+
+```{r}
+Humica_samples <- table(Humica@meta.data$Sample_ID) %>% as.data.frame() #329 individual samples
+
+toRemove <- Humica@meta.data$TAG[Humica@meta.data$Sample_ID %in% c(Humica_samples[Humica_samples$Freq<50,] %>% pull(Var1))] 
+
+Humica <- Humica[,!colnames(Humica) %in% toRemove] 
+row.names(Humica@meta.data)<- Humica@meta.data$TAG
+Humica
+```
+
+The final HuMicA object is composed of 90,716 nuclei/cells and 241 individual samples (Sample_ID).
+
+Repeat the Seurat dimensionality reduction and clustering workflow as before.
+
+```{r}
+#| warning: false
+DefaultAssay(Humica)<- "integrated"
+Humica <- RunPCA(Humica, verbose = FALSE)
+Humica <- RunUMAP(Humica, reduction = "pca", dims = 1:50)
+Humica <- FindNeighbors(Humica,  reduction = "pca",dims = 1:50)
+```
+
+Clustering with increasing resolutions.
+
+```{r}
+#| echo: false
+Humica@meta.data <- Humica@meta.data[,c(1:16)]
+rownames(Humica@meta.data)<- Humica@meta.data$TAG
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+Humica <- FindClusters(Humica,resolution=0.01)
+Humica <- FindClusters(Humica,resolution=0.025)
+Humica <- FindClusters(Humica,resolution=0.05)
+Humica <- FindClusters(Humica,resolution=0.075)
+Humica <- FindClusters(Humica,resolution=0.1)
+Humica <- FindClusters(Humica,resolution=0.15)
+Humica <- FindClusters(Humica,resolution=0.2)
+Humica <- FindClusters(Humica,resolution=0.25)
+Humica <- FindClusters(Humica,resolution=0.3)
+Humica <- FindClusters(Humica,resolution=0.35)
+Humica <- FindClusters(Humica,resolution=0.4)
+Humica <- FindClusters(Humica,resolution=0.45)
+Humica <- FindClusters(Humica,resolution=0.5)
+Humica <- FindClusters(Humica,resolution=0.55)
+Humica <- FindClusters(Humica,resolution=0.6)
+Humica <- FindClusters(Humica,resolution=0.65)
+Humica <- FindClusters(Humica,resolution=0.7)
+Humica <- FindClusters(Humica,resolution=0.75)
+Humica <- FindClusters(Humica,resolution=0.8)
+Humica <- FindClusters(Humica,resolution=0.85)
+Humica <- FindClusters(Humica,resolution=0.9)
+Humica <- FindClusters(Humica,resolution=0.95)
+Humica <- FindClusters(Humica,resolution=1)
+```
+
+Plotting a clustree:
+
+```{r}
+clustree(Humica@meta.data, prefix = "integrated_snn_res.")
+```
+
+In a clustree, a high degree of cell exchange between nodes is indicative of overclustering. We considered resolution = 0.2 to represent the optimal point in terms of the balance in cluster size and low rate of internodal cell exchange.

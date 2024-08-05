@@ -18,6 +18,7 @@ website:
       - href: DAM-related clusters.qmd
       - href: Differential composition.qmd
       - href: Pseudobulk DEGs.qmd
+      - href: RNAscope quantification.qmd
       
 format:
   html:

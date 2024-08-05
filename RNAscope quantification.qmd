@@ -1,0 +1,351 @@
+---
+title: "RNAscope"
+author: "Ricardo Martins-Ferreira"
+editor: visual
+---
+
+## RNAscope quantification
+
+The following script depicts the quantification of P2RY12 and GPNMB RNA positive dots within IBA1+ cells, as well as the number, mean and max length of branches per IBA1+ cells. The script was run on Fiji (ImageJ 1.54f).
+
+```{r}
+#| eval: false
+#| results: false
+########################################################################################################
+##
+##	Analysis of RNAScope points in Iba1-positive single cells
+##
+##	Cristina de Dios - Marta Valeri
+##	Microscopy Platform - High Technology Unit - Vall d'Hebron Research Institute (UAT-VHIR)
+##	Contact: microscopia@vhir.org
+##
+########################################################################################################
+
+## Requirements: MorpholibJ should be pre-installed before running the script. To install MorpholibJ, go to
+## Help > Update > Manage Update Sites and select IJBP-Plugins. Restart ImageJ after installation.
+
+## Adjustable parameters
+
+pos_condition = newArray("Control", "AD", "MS", "PD"); 		## Possible groups#conditions on your experiment
+red_prom = 1000;		## Prominence to use for red points count. Modify sensibly considering channel fluorescence and differences in signal-background fluorescence 
+far_red_prom = 1000;		## Prominence to use for red points count. Modify sensibly considering channel fluorescence and differences in signal-background fluorescence
+filename_end_regex = "Focus.czi";		## Regular expression used for recognition of Z-projected images. Filenames must include Z-projection tag (e.g. "Focus" in "Extended Depth of Focus" for Zeiss LSM980 microscope) and file extension at the end of the filename
+autom_nuc_prominence = 750;		## Prominence to use in the nuclei channel for automatic cell selection. Note this value is set after applying Gaussian filter (sigma=10) to the nuclei channel 
+
+## Inicialization
+
+close("*");
+close("ROI Manager");
+run("Set Measurements...", "area min redirect=None decimal=3");
+
+## Essential global variables
+title_array = newArray();
+condition_array = newArray();
+redpos_cells_array = newArray();
+farpos_cells_array = newArray();
+doublepos_cells_array = newArray();
+avg_redpoints_percell_array = newArray();
+avg_farpoints_percell_array = newArray();
+avg_skelmax_array = newArray();
+avg_skelmean_array = newArray();
+avg_skelbranch_array = newArray();
+##setBatchMode(true);
+
+## Selecting projected images
+
+dir = getDir("Choose image folder");
+results_dir = dir + "#Results#";
+selected_dir =  dir + "#Selection#";
+File.makeDirectory(results_dir);
+File.makeDirectory(selected_dir);
+filelist = getFileList(dir); 
+
+## Selecting region segmentation method
+
+Dialog.create("Nucleated Regions Selection");
+Dialog.addMessage("Select how you want to select nucleated regions:\n \n- Automatically (nuclei maxima overlap)\n- Semi-automatically (point selection overlap)\n \nPlease, take into account that if nucleus does not overlap selection will not be properly done\n \n"); 
+Dialog.addChoice("Select option", newArray("Semi-automatic selection (recommended)", "Automatic Selection"), "Semi-automatic selection (recommended)");
+Dialog.show();
+choice = Dialog.getChoice();
+
+## Iteration for every image
+for (i = 0; i < lengthOf(filelist); i++) {
+    if (endsWith(filelist[i], filename_end_regex)) { 
+    	## Essential local variables (reset for every image)
+    	label_array = newArray();
+    	redpoints_percell_array = newArray();
+		farpoints_percell_array = newArray();
+		nuc_percell_array = newArray();
+		relat_redpoints_percell_array = newArray();
+		relat_farpoints_percell_array = newArray();
+		skel_numbranch_percell_array = newArray();
+		skel_meanlength_percell_array = newArray();
+		skel_maxlength_percell_array = newArray();
+		red_counter = 0;
+		far_red_counter = 0;
+		double_counter = 0;
+		classification_array = newArray();
+    	run("Bio-Formats Importer", "open=[" + dir + filelist[i] + "] autoscale color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+    	img_title = filelist[i];
+    	title_array = Array.concat(title_array, img_title);
+    	for (j = 0; j < lengthOf(pos_condition); j++) {
+			if (matches(img_title.toUpperCase, ".*" + pos_condition[j].toUpperCase + ".*")) {
+				condition_array = Array.concat(condition_array, pos_condition[j]);
+			}
+    	}	
+    	run("Split Channels");
+		selectImage("C3-" + filelist[i]);
+		run("Duplicate...", "title=iba1_original");
+		selectImage("C4-" + filelist[i]);
+		run("Duplicate...", "title=nuclei_master");
+		selectImage("C3-" + filelist[i]);
+		
+		## Binarization
+		setAutoThreshold("Huang dark");
+		##run("Threshold...");
+		setOption("BlackBackground", true);
+		run("Convert to Mask");
+		
+		## Mask perfectioning
+		run("Fill Holes");
+		run("Options...", "iterations=10 count=4 black do=Erode");
+		run("Analyze Particles...", "size=5-Infinity show=Masks");
+		selectImage("Mask of C3-" + filelist[i]);
+		rename("iba1");
+		
+		##Skeletonization for microglial morphology
+		run("Duplicate...", "title=iba1_skel");
+		run("Invert LUT");
+		run("Skeletonize");
+		rename("iba1_skel");
+		
+		## Retrieval of selection coordinates
+		nucleated_cells = "";
+		if (choice == "Automatic Selection") {
+			selectImage("C4-" + filelist[i]);
+			run("Duplicate...", "title=nuclei");
+			selectImage("C4-" + filelist[i]);
+			run("Gaussian Blur...", "sigma=10");
+			run("Find Maxima...", "prominence="+d2s(autom_nuc_prominence, 0)+" output=List");
+			selectWindow("Results");
+			y_coords = Table.getColumn("Y");
+			x_coords = Table.getColumn("X");
+			close("Results");
+	
+			for (k = 0; k < lengthOf(y_coords); k++) {
+				x_coords_def = newArray();
+				y_coords_def = newArray();
+				selectImage("iba1");
+				coord_label = getPixel(x_coords[k], y_coords[k]);
+				if (coord_label != 0) {
+					x_coords_def = Array.concat(x_coords_def, x_coords[k]);
+					y_coords_def = Array.concat(y_coords_def, y_coords[k]);
+				}
+			}
+			if (nucleated_cells == "") {
+				x_coords_def = newArray();
+				y_coords_def = newArray();
+				waitForUser("No Iba1-positive regions overlapping with nuclei maxima were found. Moving on to semi-automatic selection");
+				run("Merge Channels...", "c1=iba1 c2=nuclei c3=iba1_original c4=[C1-" + filelist[i] + "] c5=[C2-" + filelist[i] + "] create keep");
+				setTool(7);
+				setBatchMode("exit and display");
+				waitForUser("- Select cells with nucleus. When done, click OK");
+				getSelectionCoordinates(xpoints, ypoints);
+				x_coords_def = Array.concat(x_coords_def, xpoints);
+				y_coords_def = Array.concat(y_coords_def, ypoints);
+				selectImage("iba1");
+				setBatchMode(true);
+			}
+		}
+
+		if (choice == "Semi-automatic selection (recommended)") {
+			x_coords_def = newArray();
+			y_coords_def = newArray();
+			selectImage("iba1");
+			run("16-bit");
+			run("Red");
+			run("Merge Channels...", "c1=iba1 c2=[C4-" + filelist[i] + "] c3=iba1_original c4=[C1-" + filelist[i] + "] c5=[C2-" + filelist[i] + "] create keep");
+			setTool(7);
+			setBatchMode("exit and display");
+			waitForUser("- Select cells with nucleus. When done, click OK");
+			getSelectionCoordinates(xpoints, ypoints);
+			x_coords_def = Array.concat(x_coords_def, xpoints);
+			y_coords_def = Array.concat(y_coords_def, ypoints);
+			selectImage("iba1");
+			setBatchMode(true);
+		}
+		## Creation of green + nuclei mask
+		selectImage("nuclei_master");
+		##run("Threshold...");
+		setAutoThreshold("MaxEntropy dark no-reset");
+		setOption("BlackBackground", true);
+		run("Convert to Mask");
+		run("Fill Holes");
+		run("Options...", "iterations=10 count=4 black do=Erode");
+		run("Analyze Particles...", "size=20.00-Infinity show=Masks");
+		rename("nuclei_binary");
+		imageCalculator("Add create", "nuclei_binary", "iba1");
+		rename("combined");
+		close("iba1");
+		selectImage("combined");
+		run("Connected Components Labeling", "connectivity=4 type=[16 bits]");
+		close("combined");
+		selectImage("combined-lbl");
+		rename("combined");
+		## Retrieval of selection masks and inclusion in ROI Manager for analysis
+		for(j = 0; j < x_coords_def.length; j++){
+			nucleated_cells = nucleated_cells + d2s(getPixel(x_coords_def[j], y_coords_def[j]),0)+", ";
+		}
+		run("Select Label(s)", "label(s)=[" +nucleated_cells + "]");
+		run("Remap Labels");
+		close("combined");
+		selectImage("combined-keepLabels");
+		rename("combined");
+		run("Measure");
+		setBatchMode(true);
+		max_value = getResult("Max");
+		close("Results");
+		run("ROI Manager...");
+		for (l = 0; l < max_value; l++) {
+			setThreshold(l+1, l+1, "raw");
+			run("Create Selection");
+			roiManager("Add");
+		}
+		
+		## Nuclei count per cell (needed for relativization in multinucleated masks)
+		selectImage("nuclei_binary");
+		for (m = 0; m < roiManager("count"); m++) {
+			roiManager("select", m);
+			run("Find Maxima...", "prominence=250 output=Count");
+			nuc = getResult("Count");
+			if (nuc == 0) {
+				nuc_percell_array = Array.concat(nuc_percell_array, 1);
+			} 
+			else {
+				nuc_percell_array = Array.concat(nuc_percell_array, nuc);
+			}
+			close("Results");
+		}
+		
+		## FarRed points count
+		selectImage("C1-" + filelist[i]);
+		for (m = 0; m < roiManager("count"); m++) {
+			label_array = Array.concat(label_array, m+1);
+			roiManager("select", m);
+			run("Find Maxima...", "prominence="+d2s(far_red_prom, 0)+" output=Count");
+			far_red = getResult("Count");
+			farpoints_percell_array = Array.concat(farpoints_percell_array, far_red);
+			relat_farpoints_percell_array = Array.concat(relat_farpoints_percell_array, far_red#nuc_percell_array[m]);
+			close("Results");
+		}
+		
+		
+		## Red points count
+		selectImage("C2-" + filelist[i]);
+		for (m = 0; m < roiManager("count"); m++) {
+			roiManager("select", m);
+			run("Find Maxima...", "prominence="+d2s(red_prom, 0)+" output=Count");
+			red = getResult("Count");
+			redpoints_percell_array = Array.concat(redpoints_percell_array, red);
+			relat_redpoints_percell_array = Array.concat(relat_redpoints_percell_array, red#nuc_percell_array[m]);
+			close("Results");
+		}
+		
+		## Skeleton analysis (for individual label)
+		selectImage("iba1_skel");
+		for (m = 0; m < roiManager("count"); m++) {
+			roiManager("select", m);
+			run("Duplicate...", "title=iba1_skelroi");
+			run("Analyze Skeleton (2D#3D)", "prune=none");
+			selectWindow("Results");
+			mean_branch_len = getResult("Average Branch Length");
+			max_branch_len = getResult("Maximum Branch Length");
+			branch_number = getResult("# Branches");
+			skel_numbranch_percell_array = Array.concat(skel_numbranch_percell_array, branch_number);
+			skel_meanlength_percell_array = Array.concat(skel_meanlength_percell_array,mean_branch_len);
+			skel_maxlength_percell_array = Array.concat(skel_maxlength_percell_array, max_branch_len);
+			close("Tagged skeleton");
+			close("iba1_skelroi");	
+		}
+		
+		## Getting means for summary
+		Array.getStatistics(relat_redpoints_percell_array, min, max, red_mean, stdDev);
+		Array.getStatistics(relat_farpoints_percell_array, min, max, far_mean, stdDev);
+		Array.getStatistics(skel_numbranch_percell_array, min, max, num_mean, stdDev);
+		Array.getStatistics(skel_meanlength_percell_array, min, max, mn_mean, stdDev);
+		Array.getStatistics(skel_maxlength_percell_array, min, max, mx_mean, stdDev);
+		
+		## Cleanup
+		close("Results");
+		setBatchMode("exit and display");
+		close("ROI Manager");
+		setBatchMode(true);
+		
+		## Label classification criteria
+		for (p = 0; p < redpoints_percell_array.length; p++) {
+			class = "";
+			if (redpoints_percell_array[p] > 0 && farpoints_percell_array[p] == 0) {
+				class = "Red";
+				red_counter += 1;
+			}
+			else if (redpoints_percell_array[p] == 0 && farpoints_percell_array[p] > 0) {
+				class = "FarRed";
+				far_red_counter += 1;
+			}
+			else if (redpoints_percell_array[p] > 0 && farpoints_percell_array[p] > 0) {
+				class = "Both";
+				double_counter += 1;
+			}
+			else {
+				class = "None";
+			}
+			classification_array = Array.concat(classification_array, class);
+		}
+		
+		## Create and save table for image
+		Table.create("Single Microglia Analysis of RNAScope Expression of Image " + filelist[i]);
+
+		Table.setColumn("Cell Label", label_array);
+		Table.setColumn("# Red points", redpoints_percell_array);
+		Table.setColumn("# FarRed points", farpoints_percell_array);
+		Table.setColumn("# Nuclei", farpoints_percell_array);
+		Table.setColumn("Positive for", classification_array);
+		
+		saveAs("Results", results_dir + filelist[i] + ".csv");
+		close(filelist[i] + ".csv");
+		
+		## Save label image
+		selectImage("combined");
+		run("Select None");
+		saveAs("Tiff", selected_dir + filelist[i] + ".tif");
+		close("*");
+		redpos_cells_array = Array.concat(redpos_cells_array, red_counter);
+		farpos_cells_array = Array.concat(farpos_cells_array, far_red_counter);
+		avg_redpoints_percell_array = Array.concat(avg_redpoints_percell_array, red_mean);
+		avg_farpoints_percell_array = Array.concat(avg_farpoints_percell_array, far_mean);
+		doublepos_cells_array = Array.concat(doublepos_cells_array, double_counter);
+		avg_skelbranch_array = Array.concat(avg_skelbranch_array, num_mean);
+		avg_skelmax_array = Array.concat(avg_skelmax_array, mx_mean);
+		avg_skelmean_array = Array.concat(avg_skelmean_array, mn_mean);
+		
+    } 
+    
+
+}
+
+## Creating global summary
+
+Table.create("Summary of Single Microglia Analysis of RNAScope Expression");
+
+Table.setColumn("Image_Title", title_array);
+Table.setColumn("Group", condition_array);
+Table.setColumn("Average # of Red Points per Cell", avg_redpoints_percell_array);
+Table.setColumn("Average # of FarRed Points per Cell", avg_farpoints_percell_array);
+Table.setColumn("# Red-Only Positive Cells", redpos_cells_array);
+Table.setColumn("# FarRed-Only Positive Cells", farpos_cells_array);
+Table.setColumn("# Double Positive cells", doublepos_cells_array);
+Table.setColumn("Average # of Branches", avg_skelbranch_array);
+Table.setColumn("Average Mean Branch Length", avg_skelmean_array);
+Table.setColumn("Average Maximum Branch Length", avg_skelmax_array);
+
+```

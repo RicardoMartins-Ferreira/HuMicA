@@ -1,0 +1,46 @@
+---
+title: "Integration"
+author: "Ricardo Martins-Ferreira"
+format: html
+editor: visual
+---
+
+## Integration pipeline with SCTransform-normalized datasets
+
+We used the subsetted Seurat objects of immune cells from each of the nineteen datasets integrated in the Human Microglia Atlas (HuMicA). The preprocessing and normalization pipelines were based on SCTransform normaliztion (see "Individual dataset processing.html" in this repository).
+
+### Load required packages
+
+The integration and posterior analysis were performed with Seurat v5.
+
+```{r}
+#| message: false
+libs <- c("Seurat", "tidyverse")
+suppressMessages(
+suppressWarnings(sapply(libs, require, character.only =TRUE))
+)
+```
+
+### Seurat integration
+
+Each dataset consists of the immune cell populations of the respective datasets.
+
+```{r}
+#| eval: false
+list <- list(MG_Mathys, MG_Grubman, MG_Lau, MG_Morabito, MG_Leng, MG_Zhou, MG_Pappalardo, MG_Thrupp,
+             MG_Jakel, MG_Schirmer, MG_Velmeshev, MG_Feleke, MG_Tran, MG_Franjic, MG_Yang, MG_Fullard, 
+             MG_Mancuso, MG_Olah, MG_Smajic)
+
+
+list <- lapply(X = list, FUN = SCTransform)
+
+features <- SelectIntegrationFeatures(object.list = list, nfeatures = 3000)
+
+list <- PrepSCTIntegration(object.list = list, anchor.features = features)
+
+anchors <- FindIntegrationAnchors(object.list = list, normalization.method = "SCT",
+                                  anchor.features = features, dims=1:20)
+
+combined.sct <- IntegrateData(anchorset = anchors, normalization.method = "SCT",dims=1:20,features.to.integrate =anchors@anchor.features,
+                              preserve.order = TRUE)
+```

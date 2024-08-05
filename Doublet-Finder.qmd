@@ -1,0 +1,69 @@
+---
+title: "Doublet finder"
+author: "Ricardo Martins-Ferreira"
+format: html
+editor: visual
+---
+
+## Example for the Grubman et al. 2019 dataset (PMID:31768052)
+
+The following script consists of the pipeline used to identify potential doublets with the DoubletFinder package (https://github.com/chris-mcginnis-ucsf/DoubletFinder), applied to the Grubman dataset (GSE138852).
+
+### Load required packages
+
+```{r}
+#| message: false
+libs <- c("Seurat", "DoubletFinder")
+suppressMessages(
+suppressWarnings(sapply(libs, require, character.only =TRUE))
+)
+```
+
+### DoubleFinder loop (by Sample_ID)
+
+To estimate doublets within each individual sample, the complete Seurat object of the dataset is subsetted per sample before running DoubletFinder. The Seurat object used consist of the processed object from the Grubman dataset after exclusion of the genes associated with postmortem interval (PMI) (see "Individual dataset processing.html" in this repository).
+
+```{r}
+#| eval: false
+#| message: false
+#| warning: false
+mylist <- unique(Seurat@meta.data$Subject)
+
+for (i in 1:length(mylist)) {
+  
+  Seurat_sample <- Seurat[,Seurat@meta.data$Subject==mylist[i]]
+  
+  # run sctransform
+  Seurat_sample <- SCTransform(Seurat_sample, verbose = FALSE, conserve.memory = FALSE) #defaul variable features = 3000
+  
+  # Perform linear dimensiona reduction
+  Seurat_sample <- RunPCA(Seurat_sample, verbose = FALSE)
+  
+  #Dimensionality reduction and clustering
+  
+  Seurat_sample <- RunUMAP(Seurat_sample,  reduction = "pca",dims = 1:30, verbose = FALSE)
+  Seurat_sample <- FindNeighbors(Seurat_sample,  reduction = "pca",dims = 1:30)
+  Seurat_sample <- FindClusters(Seurat_sample,resolution = 0.02) #low clustering resolution
+  
+  ## pK Identification (no ground-truth) ---------------------------------------------------------------------------------------
+  sweep.res.list_Seurat <- paramSweep_v3(Seurat_sample, PCs = 1:10, sct = T)
+  sweep.stats_Seurat <- summarizeSweep(sweep.res.list_Seurat, GT = FALSE)
+  bcmvn_Seurat <- find.pK(sweep.stats_Seurat)
+  df <- bcmvn_Seurat[which.max(bcmvn_Seurat$BCmetric),]
+  
+  max <- as.character(df[,"pK"])
+  
+  ## Homotypic Doublet Proportion Estimate -------------------------------------------------------------------------------------
+  annotations <- Seurat_sample@meta.data$SCT_snn_res.0.02 
+  homotypic.prop <- modelHomotypic(annotations)           ## annotations consist of the calculated clusters
+  nExp_poi <- round(0.075*nrow(Seurat_sample@meta.data))  ## Assuming 7.5% doublet formation rate
+  nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+  
+  ## Run DoubletFinder with varying classification stringencies ----------------------------------------------------------------
+  Seurat_sample <- doubletFinder_v3(Seurat_sample, PCs = 1:10, pN = 0.25, pK = as.numeric(max), nExp = nExp_poi, reuse.pANN = FALSE, sct = T)
+  colnames(Seurat_sample@meta.data)[ncol(Seurat_sample@meta.data)] <- "DoubletFinder"
+  
+  doublet_nuclei <- row.names(Seurat_sample@meta.data[Seurat_sample@meta.data$DoubletFinder=="Doublet",])
+  write.csv(doublet_nuclei, paste0("Doublets_",mylist[i],".csv"), row.names = F) #create a csv file with the identified doubles for each sample
+}
+```
